@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" /><meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  /><title>Merchant Console</title
+  ><style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1118;
+      --panel: #141f2b;
+      --line: #293748;
+      --ink: #eef5fc;
+      --muted: #a5b8cc;
+      --accent: #73e0bd;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font:
+        15px/1.55 system-ui,
+        sans-serif;
+    }
+    main {
+      max-width: 1320px;
+      margin: auto;
+      padding: 40px 34px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 24px;
+    }
+    .brand {
+      font-weight: 700;
+      letter-spacing: 2px;
+      font-size: 13px;
+      color: var(--accent);
+    }
+    h1 {
+      font-size: 36px;
+      letter-spacing: -1px;
+      margin: 12px 0;
+    }
+    h2 {
+      font-size: 20px;
+      margin: 0 0 12px;
+    }
+    p {
+      color: var(--muted);
+    }
+    small {
+      color: var(--muted);
+    }
+    .pill {
+      border: 1px solid #365a52;
+      color: var(--accent);
+      border-radius: 24px;
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 24px;
+      margin-top: 28px;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 24px;
+      border-radius: 12px;
+      min-width: 0;
+    }
+    .stack {
+      display: grid;
+      gap: 20px;
+    }
+    .field {
+      display: block;
+      margin: 12px 0 5px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 11px;
+      border: 1px solid #3a4c61;
+      border-radius: 7px;
+      background: #0c1621;
+      color: var(--ink);
+      font: 14px system-ui;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 150px;
+      font:
+        12px/1.6 ui-monospace,
+        monospace;
+    }
+    button {
+      border: 0;
+      background: var(--accent);
+      color: #0c2c23;
+      padding: 11px 16px;
+      font: 600 14px system-ui;
+      border-radius: 7px;
+      cursor: pointer;
+      margin: 12px 8px 0 0;
+    }
+    .secondary {
+      background: #294056;
+      color: var(--ink);
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: wait;
+    }
+    pre {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      font:
+        12px/1.7 ui-monospace,
+        monospace;
+      max-height: 580px;
+      overflow: auto;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 13px;
+    }
+    th,
+    td {
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      padding: 12px 8px;
+      vertical-align: top;
+      overflow-wrap: anywhere;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 20px 0;
+    }
+    .metric {
+      background: #0c1722;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+    .metric b {
+      display: block;
+      font-size: 27px;
+    }
+    .banner {
+      padding: 12px;
+      border-left: 3px solid var(--accent);
+      background: #112e29;
+      margin: 20px 0;
+    }
+    .error {
+      border-color: #f7a18b;
+      color: #f7c1b3;
+    }
+    img {
+      max-width: 100%;
+      border-radius: 8px;
+    }
+    a {
+      color: var(--accent);
+    }
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+      main {
+        padding: 24px 16px;
+      }
+      h1 {
+        font-size: 28px;
+      }
+      header {
+        align-items: flex-start;
+        gap: 15px;
+      }
+      .cards {
+        grid-template-columns: 1fr;
+      }
+      th,
+      td {
+        font-size: 11px;
+        padding: 8px 4px;
+      }
+    }
+  </style>
+  <main>
+    <header>
+      <div>
+        <div class="brand">KITE / 04 / INFRA & SERVICES</div>
+        <h1>Merchant Console</h1>
+        <small
+          >Versioned Kite service manifests and managed HTTP deployment
+          control</small
+        >
+      </div>
+      <span class="pill">v0.1 · evaluation</span>
+    </header>
+    <div id="notice" role="status" class="banner">
+      Ready. Credentials stay in this page's memory.
+    </div>
+    <div class="layout">
+      <section class="panel">
+        <h2>Service definition</h2>
+        <label class="field" for="token">Workspace access token</label
+        ><input
+          id="token"
+          type="password"
+          autocomplete="off"
+          placeholder="Enter your configured access token"
+        /><label class="field" for="target">Managed target reference</label
+        ><input id="target" value="local" /><label class="field" for="service"
+          >Service revision target</label
+        ><select id="service">
+          <option value="">Import or refresh first</option></select
+        ><label class="field" for="manifest"
+          >Official manifest · YAML or JSON</label
+        ><textarea
+          id="manifest"
+          rows="17"
+          placeholder="Paste your service.yaml"
+        ></textarea
+        ><button id="import">Import service</button
+        ><button id="release" class="secondary">Create revision</button
+        ><button id="refresh" class="secondary">Refresh</button>
+        <p>
+          Import and draft revision are separate. Apply changes only to your
+          configured deployment target.
+        </p>
+      </section>
+      <section class="panel">
+        <h2>Desired / applied</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Service</th>
+              <th>Desired</th>
+              <th>Applied</th>
+              <th>State</th>
+            </tr>
+          </thead>
+          <tbody id="services"></tbody>
+        </table>
+        <h2 style="margin-top: 28px">Releases</h2>
+        <div id="releases" class="stack"></div>
+        <pre id="details">
+Select a release action to view its observed evidence.</pre>
+      </section>
+    </div>
+    <p>
+      <small
+        >AI-assisted development · local evidence and real integration evidence
+        are tracked separately · no official listing claimed</small
+      >
+    </p>
+  </main>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    function notice(text, error = false) {
+      $("notice").textContent = text;
+      $("notice").classList.toggle("error", error);
+    }
+    async function api(path, method = "GET", data) {
+      const response = await fetch(path, {
+        method,
+        headers: {
+          authorization: "Bearer " + $("token").value,
+          "content-type": "application/json",
+        },
+        body: data ? JSON.stringify(data) : undefined,
+      });
+      const result = await response.json();
+      if (!response.ok) throw Error(result.error || "HTTP " + response.status);
+      return result;
+    }
+    function cell(row, text) {
+      const td = document.createElement("td");
+      td.textContent = String(text ?? "—");
+      row.append(td);
+      return td;
+    }
+    function action(label, fn) {
+      const b = document.createElement("button");
+      b.textContent = label;
+      b.className = "secondary";
+      b.onclick = () => fn().catch((e) => notice(e.message, true));
+      return b;
+    }
+    function run(fn) {
+      return async () => {
+        try {
+          await fn();
+        } catch (e) {
+          notice(e.message, true);
+        }
+      };
+    }
+    async function refresh() {
+      const data = await api("/services");
+      $("services").replaceChildren();
+      const selected = $("service").value;
+      $("service").replaceChildren();
+      for (const s of data.services) {
+        const tr = document.createElement("tr");
+        cell(tr, s.id);
+        cell(tr, s.desired?.slice(0, 8));
+        cell(tr, s.applied?.slice(0, 8));
+        cell(tr, s.status).append(
+          action("Pause", async () => {
+            await api("/services/" + s.id + "/pause", "POST", {});
+            await refresh();
+          }),
+        );
+        $("services").append(tr);
+        const option = document.createElement("option");
+        option.value = s.id;
+        option.textContent = s.id;
+        if (s.id === selected) option.selected = true;
+        $("service").append(option);
+      }
+      $("releases").replaceChildren();
+      for (const r of data.releases) {
+        const box = document.createElement("div");
+        const title = document.createElement("strong");
+        title.textContent =
+          r.service_id + " / revision " + r.number + " / " + r.status;
+        box.append(title, document.createElement("br"));
+        for (const method of ["preflight", "apply", "observe", "rollback"])
+          box.append(
+            action(method, async () => {
+              const result = await api(
+                "/releases/" + r.id + "/" + method,
+                "POST",
+                {},
+              );
+              $("details").textContent = JSON.stringify(result, null, 2);
+              await refresh();
+            }),
+          );
+        $("releases").append(box);
+      }
+      notice(
+        "Managed state refreshed. Draft status does not claim live payment verification.",
+      );
+    }
+    $("refresh").onclick = run(refresh);
+    $("import").onclick = run(async () => {
+      await api("/services", "POST", {
+        target_id: $("target").value,
+        manifest: $("manifest").value,
+      });
+      await refresh();
+    });
+    $("release").onclick = run(async () => {
+      const id = $("service").value;
+      if (!id) throw Error("Choose a service revision target.");
+      await api("/services/" + id + "/releases", "POST", {
+        manifest: $("manifest").value,
+      });
+      await refresh();
+    });
+  </script>
+</html>

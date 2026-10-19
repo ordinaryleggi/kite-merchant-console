@@ -1,0 +1,13 @@
+{
+  "project": "kite-merchant-console",
+  "status": "PASS",
+  "checks": [
+    "actual managed HTTP backend",
+    "manifest import",
+    "preflight",
+    "apply/readback",
+    "pause",
+    "rollback/readback"
+  ],
+  "evidence_level": "E1"
+}

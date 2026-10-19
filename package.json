@@ -1,0 +1,19 @@
+{
+  "name": "@ordinaryleggi/kite-merchant-console",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Versioned Kite service manifests and managed HTTP deployment control",
+  "engines": {
+    "node": ">=20.11"
+  },
+  "scripts": {
+    "test": "node --test",
+    "start": "node src/main.mjs"
+  },
+  "dependencies": {
+    "ajv": "8.17.1",
+    "ajv-formats": "3.0.1",
+    "yaml": "2.8.2"
+  }
+}
