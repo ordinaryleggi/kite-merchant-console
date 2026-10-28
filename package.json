@@ -1,6 +1,6 @@
 {
   "name": "@ordinaryleggi/kite-merchant-console",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "Versioned Kite service manifests and managed HTTP deployment control",

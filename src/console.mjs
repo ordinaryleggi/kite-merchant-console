@@ -60,6 +60,61 @@ export class Console {
       throw fault("managed_target_http_" + r.status, 502);
     return { status: r.status, data };
   }
+  async quote(service, release, endpoint, checkPrice = false) {
+    const target = this.target(service.target_id);
+    const profile = target.payment;
+    if (
+      !profile ||
+      !/^0x[0-9a-f]{40}$/i.test(profile.asset || "") ||
+      !Number.isInteger(profile.decimals) ||
+      profile.decimals < 0 ||
+      profile.decimals > 18
+    )
+      throw fault("payment_profile_required", 409);
+    const reply = await this.request(
+      service.target_id,
+      endpoint.path,
+      endpoint.method,
+      endpoint.example_request?.body || {},
+    );
+    const terms = reply.data.accepts?.[0];
+    if (
+      reply.status !== 402 ||
+      reply.data.x402Version !== 2 ||
+      reply.data.resource?.url !== new URL(endpoint.path, target.origin).href ||
+      terms?.scheme !== "exact" ||
+      terms?.network !== release.manifest.network ||
+      terms?.payTo?.toLowerCase() !== release.manifest.pay_to.toLowerCase() ||
+      terms?.asset?.toLowerCase() !== profile.asset.toLowerCase() ||
+      typeof terms?.amount !== "string" ||
+      !/^[1-9]\d*$/.test(terms.amount) ||
+      !Number.isInteger(terms.maxTimeoutSeconds) ||
+      terms.maxTimeoutSeconds <= 0
+    )
+      throw fault("quote_manifest_mismatch", 409);
+    if (checkPrice) {
+      const price = endpoint.price_usd;
+      if (typeof price !== "string" || !/^(0|[1-9]\d*)(\.\d+)?$/.test(price))
+        throw fault("invalid_price", 409);
+      const [whole, fraction = ""] = price.split(".");
+      if (fraction.length > profile.decimals)
+        throw fault("price_precision", 409);
+      const expected = (
+        BigInt(whole) * 10n ** BigInt(profile.decimals) +
+        BigInt(fraction.padEnd(profile.decimals, "0") || "0")
+      ).toString();
+      if (terms.amount !== expected)
+        throw fault("applied_quote_price_mismatch", 409);
+    }
+    return {
+      path: endpoint.path,
+      status: reply.status,
+      network: terms.network,
+      asset: terms.asset,
+      amount: terms.amount,
+      payTo: terms.payTo,
+    };
+  }
   list() {
     const s = this.vault.read();
     return {
@@ -130,26 +185,7 @@ export class Console {
       const health = await this.request(svc.target_id, "/healthz");
       const quotes = [];
       for (const e of r.manifest.endpoints) {
-        const reply = await this.request(
-          svc.target_id,
-          e.path,
-          e.method,
-          e.example_request?.body || {},
-        );
-        const terms = reply.data.accepts?.[0];
-        quotes.push({
-          path: e.path,
-          status: reply.status,
-          network: terms?.network,
-          amount: terms?.amount,
-          payTo: terms?.payTo,
-        });
-        if (
-          reply.status !== 402 ||
-          terms?.network !== r.manifest.network ||
-          terms?.payTo?.toLowerCase() !== r.manifest.pay_to.toLowerCase()
-        )
-          throw fault("quote_manifest_mismatch", 409);
+        quotes.push(await this.quote(svc, r, e));
       }
       probe = {
         ok: health.data.status === "ok",
@@ -216,13 +252,29 @@ export class Console {
     if (!r) throw fault("release_not_found", 404);
     const service = state.services[r.service_id],
       actual = (await this.request(service.target_id, "/admin/config")).data;
+    let quotes = [],
+      quoteError = null;
+    try {
+      for (const endpoint of r.manifest.endpoints)
+        quotes.push(await this.quote(service, r, endpoint, true));
+    } catch (e) {
+      quoteError = e.code || "quote_readback_failed";
+    }
     return this.vault.transaction((s, save) => {
       const release = s.releases[id];
       release.observed = actual;
       release.status =
-        hash(actual.config) === hash(release.desired_config)
+        !quoteError && hash(actual.config) === hash(release.desired_config)
           ? "VERIFIED"
           : "DRIFTED";
+      release.verification = {
+        configuration_verified:
+          hash(actual.config) === hash(release.desired_config),
+        quote_verified: !quoteError,
+        quotes,
+        quote_error: quoteError,
+        purchase_verified: false,
+      };
       if (release.status === "VERIFIED") {
         s.services[release.service_id].applied = id;
         s.services[release.service_id].manifest = release.manifest;

@@ -1,0 +1,25 @@
+{
+  "observed_at": "2026-10-28T12:45:35.290Z",
+  "version": "0.2.0",
+  "project": "kite-merchant-console",
+  "status": "PASS",
+  "node_runtime": "v24.22.1",
+  "test_cases": null,
+  "dotnet_assertions": null,
+  "evidence_level": "E1",
+  "actual_spend": false,
+  "log_sha256": "f34168c4fefbc0e60b75dfb6da22b4dc4a4bc9ebf216c748418da1155395d3d8",
+  "http": {
+    "project": "kite-merchant-console",
+    "status": "PASS",
+    "checks": [
+      "actual managed HTTP backend",
+      "manifest import",
+      "preflight",
+      "apply/readback",
+      "pause",
+      "rollback/readback"
+    ],
+    "evidence_level": "E1"
+  }
+}
